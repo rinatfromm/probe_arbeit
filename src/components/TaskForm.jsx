@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import styles from './TaskForm.module.css'; 
+import styles from './TaskForm.module.css';
 
 const TaskForm = ({ onSubmit, editingTask }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (editingTask) {
@@ -15,15 +16,30 @@ const TaskForm = ({ onSubmit, editingTask }) => {
         }
     }, [editingTask]);
 
+    const validateForm = () => {
+        const errors = {};
+
+        if (!title.trim()) {
+            errors.title = 'Title is required';
+        }
+
+        if (!description.trim()) {
+            errors.description = 'Description is required';
+        }
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!title) {
-            alert('Title is required');
-            return;
+
+        if (validateForm()) {
+            onSubmit({ id: editingTask?.id, title, description });
+            setTitle('');
+            setDescription('');
+            setErrors({});
         }
-        onSubmit({ id: editingTask?.id, title, description });
-        setTitle('');
-        setDescription('');
     };
 
     return (
@@ -35,6 +51,7 @@ const TaskForm = ({ onSubmit, editingTask }) => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
+                {errors.title && <span className={styles.error}>{errors.title}</span>}
             </div>
             <div>
                 <label>Description</label>
@@ -43,6 +60,7 @@ const TaskForm = ({ onSubmit, editingTask }) => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
+                {errors.description && <span className={styles.error}>{errors.description}</span>}
             </div>
             <button type="submit">{editingTask ? 'Update' : 'Create'} Task</button>
         </form>
@@ -50,6 +68,7 @@ const TaskForm = ({ onSubmit, editingTask }) => {
 };
 
 export default TaskForm;
+
 
 
 
